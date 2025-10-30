@@ -3,8 +3,14 @@
 A reading tracker web application that allows users to search for books using the **Open Library API**, save them to their personal digital shelf, and manage their book collection.
 
 ## Team Members
+
+**Sprint 1/2:**
 - Alston
 - Danny
+
+**Sprint 3:**
+- Kim
+- Maddie
 
 ---
 
@@ -34,7 +40,8 @@ A reading tracker web application that allows users to search for books using th
 | Backend            | Node.js, Express.js          |
 | Database           | MySQL (`mysql2/promise`)     |
 | External API       | Open Library API            |
-| Deployment         | Ubuntu Server + PM2         |
+| Packaging     | Docker            |
+| Deployment         | Ubuntu Server         |
 
 ---
 
@@ -45,25 +52,26 @@ Make sure the following are installed:
 - [Node.js v18+](https://nodejs.org/en/)
 - [npm](https://www.npmjs.com/)
 - [MySQL](https://dev.mysql.com/downloads/mysql/)
-- [PM2](https://pm2.keymetrics.io/) (for deployment)
+- [Docker](https://www.docker.com/get-started/)
 
 ---
 
 ## Environment Variables
 
-### Backend `.env`
-```
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=StrongPassword123!
-DB_NAME=ourshelves
-PORT=3000
-```
+### Inside project root `env`
+```env
+# db & api
+MYSQL_USER=username
+MYSQL_PASSWORD=superSecurePassword
+MYSQL_DATABASE=my_favorite_db
 
-### Frontend `.env`
-```
-VITE_API_URL=http://localhost:3000
+# api
+DB_PORT=3306
+PORT=3000
+HOST=localhost
+
+# frontend
+VITE_API_URL=http://${HOST}:${PORT}
 ```
 
 > For production, replace `localhost` with your server IP or domain name.
@@ -87,73 +95,110 @@ cd ../frontend
 npm install
 ```
 
-### 3. Set Up `.env` Files
-- Create `.env` inside both `backend/` and `frontend/` directories.
+### 3. Set Up `.env` File
+- Create `.env` inside root directory.
 - Copy and paste the environment variable structure shown above.
-
-### 4. Set Up MySQL Database
-Login to MySQL:
-```bash
-mysql -u root -p
-```
-Then run:
-```sql
-CREATE DATABASE ourshelves;
-USE ourshelves;
-```
-(You can also run your `schema.sql` file here if you’ve set up tables.)
 
 ---
 
 ## Running the Application (Local)
 
-### Run the Backend:
+The backend, frontend, and MySQL server can all be built and ran with one command:
 ```bash
-cd backend
-npm run dev
-```
-Server will run on:
-```
-http://localhost:3000
-```
-
-### Run the Frontend:
-```bash
-cd frontend
-npm run dev
-```
-Frontend will run on:
-```
-http://localhost:5173
+docker compose up -d
 ```
 
 ---
 
-## Deployment Instructions (Ubuntu + PM2)
+## Deployment Instructions (Ubuntu + Docker)
 
-### 1. Install PM2 Globally (if not installed)
+### 1. Update VM and Install Dependencies
+**Updating:**
 ```bash
-npm install -g pm2
+apt update
+yes | sudo DEBIAN_FRONTEND=noninteractive apt-get -yqq upgrade
 ```
 
-### 2. Start Backend and Frontend with PM2
+**Install Git**
 ```bash
-pm2 start ecosystem.config.js
-pm2 save
+apt install git
 ```
 
-### 3. Check Status and Logs
+**Install Docker Engine With apt Repository**
+Setup apt repo:
 ```bash
-pm2 status
-pm2 logs backend
-pm2 logs frontend
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+Install docker package:
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-### 4. Auto-start PM2 on Server Reboot
+Confirm docker is installed and running:
 ```bash
-pm2 startup
+sudo systemctl status docker
 ```
-Follow the instructions output by the above command.
+
+**Install docker compose**
+```bash
+sudo apt-get update
+sudo apt-get install docker-compose-plugin
+```
+
+### 2. Clone Repository
+```bash
+git clone https://github.com/your-username/our-shelves.git
+cd our-shelves
+```
+
+### 3. Add .env to repository
+```bash
+nano .env
+```
+Inside nano text editor:
+
+```env
+# db & api
+MYSQL_USER=username
+MYSQL_PASSWORD=superSecurePassword
+MYSQL_DATABASE=my_favorite_db
+
+# api
+DB_PORT=3306
+PORT=3000
+HOST=<VM IP>
+
+# frontend
+VITE_API_URL=http://${HOST}:${PORT}
+```
+Ctrl + o to save
+Ctrl + x to exit
+
+Check if .env exists:
+```bash
+ls -a
+```
+### 4. Build and Deploy Docker Images
+The application can be built and deployed with one command now:
+```bash
+docker compose up -d
+```
+
+The frontend will be running on the VMs IP address defined in the env, on PORT 5173.
+ex: http://0.0.0.0:5173  (replace 0.0.0.0 with VM IP)
+
 
 ---
 
@@ -170,29 +215,22 @@ Follow the instructions output by the above command.
 
 ## Useful Commands
 
+**Updating Deployed App:**
 ```bash
-# Restart all processes
-pm2 restart all
+git pull
+docker compose up -build
+```
 
-# View logs
-pm2 logs
-
-# Clear old logs
-pm2 flush
-
-# Stop processes
-pm2 stop all
-
-# Delete processes
-pm2 delete all
+**Stopping:**
+```bash
+docker compose down
 ```
 
 ---
 
 ## Troubleshooting Tips
-- Ensure `.env` files are correctly configured in both `frontend` and `backend`.
-- Confirm MySQL credentials match your `.env`.
-- Use `pm2 flush` to clear old logs when fixing errors.
+- Ensure `.env` files are correctly configured
+- Confirm no leading spaces in env variables
 - Check firewall settings if deploying to a remote server (allow ports 3000 and 5173).
 
 ---

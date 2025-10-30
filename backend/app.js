@@ -10,12 +10,12 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || 'localhost';
 
 // enabling CORS (so frontend can communicate with backend from different domain)
 app.use(cors({
     origin: [
-      'http://localhost:5173', // local development
-      'http://143.198.145.165:5173' // deployed server
+      `http://${HOST}:5173`
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -38,4 +38,4 @@ app.get('/db-test', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running at http://${HOST}:${PORT}`));
