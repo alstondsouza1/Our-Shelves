@@ -1,6 +1,5 @@
-import { afterAll, beforeEach, expect, jest } from '@jest/globals';
+import { afterAll, afterEach, beforeEach, describe, expect, jest, it } from '@jest/globals';
 import { fetchBooks } from '../controllers/bookController';
-import { describe } from 'pm2';
 
 const ogFetch = global.fetch;
 global.fetch = jest.fn();
@@ -25,7 +24,7 @@ describe("fetchBooks", () => {
         consoleErrSpy.mockRestore();
     });
 
-    it("should fetch books, encode URL, and map data correctly", () => {
+    it("should fetch books, encode URL, and map data correctly", async () => {
         const bookName = "Moby Dick";
         const mockData = {
             numFound: 1,
@@ -64,5 +63,41 @@ describe("fetchBooks", () => {
             }]
         });
         expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it('should return 500 status if Open Library API returns a non-OK response', async () => {
+        fetch.mockResolvedValueOnce({
+            ok: false,
+            status: 403,
+        });
+
+        const req = { params: { bookName: 'Error Test' } };
+        const res = mockResponse();
+
+        await fetchBooks(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Failed to fetch books',
+            message: 'Open Library API error: 403',
+        });
+    });
+
+    it('should return 500 status if fetch throws a network error', async () => {
+        const networkError = new Error('DNS lookup failed');
+        fetch.mockRejectedValueOnce(networkError); // Simulate a network failure
+
+        const req = { params: { bookName: 'Network Error' } };
+        const res = mockResponse();
+
+        await fetchBooks(req, res);
+
+        // Verification: Check for 500 error response and logging
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({
+            error: 'Failed to fetch books',
+            message: 'DNS lookup failed',
+        });
+        expect(consoleErrorSpy).toHaveBeenCalled();
     });
 });
