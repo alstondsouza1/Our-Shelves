@@ -85,19 +85,18 @@ describe("fetchBooks", () => {
 
     it('should return 500 status if fetch throws a network error', async () => {
         const networkError = new Error('DNS lookup failed');
-        fetch.mockRejectedValueOnce(networkError); // Simulate a network failure
+        fetch.mockRejectedValueOnce(networkError);
 
         const req = { params: { bookName: 'Network Error' } };
         const res = mockResponse();
 
         await fetchBooks(req, res);
 
-        // Verification: Check for 500 error response and logging
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({
             error: 'Failed to fetch books',
             message: 'DNS lookup failed',
         });
-        expect(consoleErrorSpy).toHaveBeenCalled();
+        expect(consoleErrSpy).toHaveBeenCalled();
     });
 });

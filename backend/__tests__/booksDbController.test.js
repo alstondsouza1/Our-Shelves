@@ -1,26 +1,27 @@
-import { jest } from '@jest/globals';
-import {
-   listBooks,
-   getBookById,
-   createBook,
-   updateBook,
-   deleteBook
-} from '../controllers/booksDbController.js';
+import { jest, beforeEach, describe, it, expect } from "@jest/globals";
 
-jest.mock('../db.js', () => ({
+const mockDb = {
+   query: jest.fn(),
+   execute: jest.fn(),
+};
+
+await jest.unstable_mockModule("../db.js", () => ({
    __esModule: true,
-   default: {
-      query: jest.fn(),
-      execute: jest.fn(),
-   },
+   default: mockDb,
 }));
 
-import db from '../db.js';
+const { listBooks, getBookById, createBook, updateBook, deleteBook } =
+   await import("../controllers/booksDbController.js");
+
+const db = (await import("../db.js")).default;
 
 const getMockRes = () => {
+
    const res = {};
+
    res.status = jest.fn().mockReturnValue(res);
    res.json = jest.fn().mockReturnValue(res);
+   
    return res;
 };
 
@@ -29,10 +30,10 @@ beforeEach(() => {
    db.execute.mockReset();
 });
 
-describe('listBooks', () => {
-   it('Should fetch all books and return them as JSON', async () => {
+describe("listBooks", () => {
+   it("Should fetch all books and return them as JSON", async () => {
 
-      const mockBooks = [{ id: 1, title: 'Test Book' }];
+      const mockBooks = [{ id: 1, title: "Test Book" }];
 
       db.query.mockResolvedValue([mockBooks]);
 
@@ -41,16 +42,15 @@ describe('listBooks', () => {
 
       await listBooks(req, res);
 
-      expect(db.query).toHaveBeenCalledWith(expect.stringContaining('SELECT'));
-
+      expect(db.query).toHaveBeenCalledWith(expect.stringContaining("SELECT"));
       expect(res.json).toHaveBeenCalledWith(mockBooks);
    });
 });
 
-describe('getBookById', () => {
-   it('Should return a single book if found', async () => {
+describe("getBookById", () => {
+   it("Should return a single book if found", async () => {
 
-      const mockBook = { id: 1, title: 'Test Book' };
+      const mockBook = { id: 1, title: "Test Book" };
 
       db.query.mockResolvedValue([[mockBook]]);
 
@@ -59,11 +59,14 @@ describe('getBookById', () => {
 
       await getBookById(req, res);
 
-      expect(db.query).toHaveBeenCalledWith(expect.stringContaining('WHERE id = ?'), [1]);
+      expect(db.query).toHaveBeenCalledWith(
+         expect.stringContaining("WHERE id = ?"),
+         [1]
+      );
       expect(res.json).toHaveBeenCalledWith(mockBook);
    });
 
-   it('Should return 404 if book is not found', async () => {
+   it("Should return 404 if book is not found", async () => {
 
       db.query.mockResolvedValue([[]]);
 
@@ -73,17 +76,17 @@ describe('getBookById', () => {
       await getBookById(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Book not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: "Book not found" });
    });
 });
 
-describe('createBook', () => {
-   it('Should create a new book and return it', async () => {
+describe("createBook", () => {
+   it("Should create a new book and return it", async () => {
 
       const newBook = {
-         title: 'Twerking while Coding',
-         author: 'Amazon Web Services',
-         year: 2025
+         title: "Twerking while Coding",
+         author: "Amazon Web Services",
+         year: 2025,
       };
 
       db.execute.mockResolvedValue([{ insertId: 42 }]);
@@ -94,51 +97,50 @@ describe('createBook', () => {
       await createBook(req, res);
 
       expect(db.execute).toHaveBeenCalledWith(
-         expect.stringContaining('INSERT INTO books'),
+         expect.stringContaining("INSERT INTO books"),
          [
-            'Twerking while Coding',
-            'Amazon Web Services',
+            "Twerking while Coding",
+            "Amazon Web Services",
             null,
             null,
             2025,
-            null
+            null,
          ]
       );
-
       expect(res.status).toHaveBeenCalledWith(201);
-
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-         id: 42,
-         title: 'Twerking while Coding'
-      }));
+      expect(res.json).toHaveBeenCalledWith(
+         expect.objectContaining({
+            id: 42,
+            title: "Twerking while Coding",
+         })
+      );
    });
 
-   it('Should return 400 if title is missing', async () => {
+   it("Should return 400 if title is missing", async () => {
 
-      const noTitleBook = { author: 'Bruh' };
+      const noTitleBook = { author: "Bruh" };
       const req = { body: noTitleBook };
       const res = getMockRes();
 
       await createBook(req, res);
 
       expect(db.execute).not.toHaveBeenCalled();
-
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Title is required' });
+      expect(res.json).toHaveBeenCalledWith({ error: "Title is required" });
    });
 });
 
-describe('updateBook', () => {
-   it('Should update an existing book and return success', async () => {
+describe("updateBook", () => {
+   it("Should update an existing book and return success", async () => {
 
       const bookId = 1;
       const updatedData = {
-         title: 'Updated Title',
-         author: 'Updated Author',
-         genre: 'Sci-Fi',
-         description: 'Updated Desc',
+         title: "Updated Title",
+         author: "Updated Author",
+         genre: "Sci-Fi",
+         description: "Updated Desc",
          year: 2039,
-         cover: 'new-cover.jpg'
+         cover: "new-cover.jpg",
       };
 
       db.execute.mockResolvedValue([{ affectedRows: 1 }]);
@@ -148,25 +150,29 @@ describe('updateBook', () => {
 
       await updateBook(req, res);
 
-      expect(db.execute).toHaveBeenCalledWith(
-         expect.stringContaining('UPDATE books SET'),
-         [
-            'Updated Title',
-            'Updated Author',
-            'Sci-Fi',
-            'Updated Desc',
-            2039,
-            'new-cover.jpg',
-            bookId
-         ]
-      );
-      expect(res.json).toHaveBeenCalledWith({ message: 'Book updated successfully' });
+      expect(db.execute).toHaveBeenCalledTimes(1);
+
+      const [sql, params] = db.execute.mock.calls[0];
+
+      expect(sql).toEqual(expect.stringContaining("UPDATE books"));
+      expect(params).toEqual([
+         "Updated Title",
+         "Updated Author",
+         "Sci-Fi",
+         "Updated Desc",
+         2039,
+         "new-cover.jpg",
+         bookId,
+      ]);
+      expect(res.json).toHaveBeenCalledWith({
+         message: "Book updated successfully",
+      });
    });
 
-   it('Should return 404 if book to update is not found', async () => {
+   it("Should return 404 if book to update is not found", async () => {
 
       const bookId = 1234;
-      const updatedData = { title: 'Won\'t work' };
+      const updatedData = { title: "Won't work" };
 
       db.execute.mockResolvedValue([{ affectedRows: 0 }]);
 
@@ -176,12 +182,12 @@ describe('updateBook', () => {
       await updateBook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Book not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: "Book not found" });
    });
 });
 
-describe('deleteBook', () => {
-   it('Should delete a book and return success', async () => {
+describe("deleteBook", () => {
+   it("Should delete a book and return success", async () => {
 
       const bookId = 1;
 
@@ -193,13 +199,15 @@ describe('deleteBook', () => {
       await deleteBook(req, res);
 
       expect(db.execute).toHaveBeenCalledWith(
-         'DELETE FROM books WHERE id = ?',
+         "DELETE FROM books WHERE id = ?",
          [bookId]
       );
-      expect(res.json).toHaveBeenCalledWith({ message: 'Book deleted successfully' });
+      expect(res.json).toHaveBeenCalledWith({
+         message: "Book deleted successfully",
+      });
    });
 
-   it('Should return 404 if book to delete is not found', async () => {
+   it("Should return 404 if book to delete is not found", async () => {
 
       const bookId = 5678;
 
@@ -211,6 +219,6 @@ describe('deleteBook', () => {
       await deleteBook(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Book not found' });
+      expect(res.json).toHaveBeenCalledWith({ error: "Book not found" });
    });
 });
