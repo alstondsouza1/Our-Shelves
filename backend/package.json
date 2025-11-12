@@ -27,6 +27,7 @@
     "dev": "nodemon app.js",
     "start": "node app.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:integration": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js",
     "test:watch": "npm run test -- --watch"
   },
   "dependencies": {
@@ -40,5 +41,12 @@
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4"
+  },
+  "jest": {
+    "globalSetup": "./jest.setup.js#setup",
+    "globalTeardown": "./jest.setup.js#teardown",
+    "testMatch": [
+      "**/integration.test.js"
+    ]
   }
 }
