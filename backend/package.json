@@ -25,7 +25,9 @@
   "contributors": [],
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "jest",
+    "test:watch": "npm run test -- --watch"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -35,6 +37,8 @@
     "mysql2": "^3.15.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
   }
 }
