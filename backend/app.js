@@ -39,3 +39,5 @@ app.get('/db-test', async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`Server running at http://${HOST}:${PORT}`));
+
+export default app;
