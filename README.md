@@ -12,6 +12,9 @@ A reading tracker web application that allows users to search for books using th
 - Kim
 - Maddie
 
+**Sprint 4:**
+- Tav
+- Tia
 ---
 
 ## Project Description
@@ -100,6 +103,82 @@ npm install
 - Copy and paste the environment variable structure shown above.
 
 ---
+
+## Testing Strategy
+
+This project includes unit tests for both the frontend and backend, integration tests, as well as end-to-end (E2E) tests.
+
+### Backend - Unit Tests (Jest)
+
+Purpose: Tests individual backend controllers in isolation. All database calls (db.js) and fetch requests are mocked, so no database or network connection is required.
+
+How to Run:
+
+```bash
+cd backend
+npm test
+```
+
+
+This command runs all files ending in .test.js found in the backend/__tests__ folder.
+
+### Frontend - Unit Tests (Vitest & React Testing Library)
+
+Purpose: Tests individual React components in a simulated browser environment. All fetch API calls are mocked in the setup file (frontend/src/setupTests.js).
+
+How to Run:
+
+```bash
+cd frontend
+npm test
+```
+
+This command will start Vitest in "watch mode," automatically re-running tests as you save changes.
+
+### Coverage Reports
+
+To generate a coverage report, cd into the respective directory (backend/frontend) and run the following command
+
+```bash
+npm test -- --coverage
+```
+
+## Backend - Integration Tests (Jest & Testcontainers)
+
+Purpose: Tests the live application routes and controllers against a real, temporary database. This ensures all database queries, joins, and logic work as expected.
+
+### Requirements: Docker must be installed and running on your system
+
+How to Run:
+
+```bash
+cd backend
+npm run test:integration
+```
+
+## End-to-End (E2E) Tests (Cypress)
+
+Purpose: Simulates a real user journey in a real browser. It tests the complete application flow, from searching for a book to adding it to the library and deleting it.
+
+How to Run (2 Steps):
+
+1. Start the frontend dev server:
+
+```bash
+cd frontend
+npm run dev
+```
+
+2. Open the Cypress runner:
+
+### Important - Make sure to do this in a new terminal window
+
+```bash
+cd frontend
+npx cypress open
+```
+
+This will open the Cypress app. From there, you can choose a browser and run the app.cy.js test suite.
 
 ## Running the Application (Local)
 
