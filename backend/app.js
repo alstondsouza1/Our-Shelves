@@ -34,17 +34,4 @@ app.get('/db-test', async (req, res) => {
   }
 });
 
-const startServer = async () => {
-  try {
-    await db.getConnection();
-    console.log("Database connected successfully");
-    
-    app.listen(PORT, () => console.log(`Server running at http://${HOST}:${PORT}`));
-    
-  } catch (err) {
-    console.error("Failed to connect to the database:", err.message);
-    process.exit(1);
-  }
-};
-
-startServer();
+export default app;

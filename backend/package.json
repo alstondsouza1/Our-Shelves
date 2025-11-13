@@ -1,48 +1,48 @@
 {
-  "name": "",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
-  "license": "AGPL-version-3.0",
-  "private": false,
-  "engines": {
-    "node": ">= 14.0.0",
-    "npm": ">= 6.0.0"
-  },
-  "homepage": "",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "bugs": "",
-  "keywords": [],
-  "author": {
-    "name": "",
-    "email": "",
-    "url": ""
-  },
-  "contributors": [],
-  "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:integration": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs",
-    "test:watch": "npm run test -- --watch"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.2",
-    "express": "^5.1.0",
-    "morgan": "^1.10.1",
-    "mysql2": "^3.15.1"
-  },
-  "devDependencies": {
-    "@testcontainers/mysql": "^11.8.1",
-    "cross-env": "^10.1.0",
-    "jest": "^30.2.0",
-    "nodemon": "^3.1.10",
-    "supertest": "^7.1.4",
-    "testcontainers": "^11.8.1"
-  }
+   "name": "",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.js",
+   "type": "module",
+   "license": "AGPL-version-3.0",
+   "private": false,
+   "engines": {
+      "node": ">= 14.0.0",
+      "npm": ">= 6.0.0"
+   },
+   "homepage": "",
+   "repository": {
+      "type": "git",
+      "url": ""
+   },
+   "bugs": "",
+   "keywords": [],
+   "author": {
+      "name": "",
+      "email": "",
+      "url": ""
+   },
+   "contributors": [],
+   "scripts": {
+      "dev": "nodemon server.js",
+      "start": "node server.js",
+      "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js",
+      "test:integration": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs",
+      "test:watch": "npm run test -- --watch"
+   },
+   "dependencies": {
+      "cors": "^2.8.5",
+      "dotenv": "^17.2.2",
+      "express": "^5.1.0",
+      "morgan": "^1.10.1",
+      "mysql2": "^3.15.1"
+   },
+   "devDependencies": {
+      "@testcontainers/mysql": "^11.8.1",
+      "cross-env": "^10.1.0",
+      "jest": "^30.2.0",
+      "nodemon": "^3.1.10",
+      "supertest": "^7.1.4",
+      "testcontainers": "^11.8.1"
+   }
 }

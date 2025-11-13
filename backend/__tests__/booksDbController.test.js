@@ -132,8 +132,16 @@ describe("createBook", () => {
 
 describe("updateBook", () => {
    it("Should update an existing book and return success", async () => {
-
       const bookId = 1;
+      const originalBook = {
+         id: 1,
+         title: "Original Title",
+         author: "Original Author",
+         genre: "Original Genre",
+         description: "Original Desc",
+         year: 2000,
+         cover: "original-cover.jpg",
+      };
       const updatedData = {
          title: "Updated Title",
          author: "Updated Author",
@@ -143,17 +151,23 @@ describe("updateBook", () => {
          cover: "new-cover.jpg",
       };
 
-      db.execute.mockResolvedValue([{ affectedRows: 1 }]);
+      db.execute.mockResolvedValueOnce([[originalBook]]);
+
+      db.execute.mockResolvedValueOnce([{ affectedRows: 1 }]);
 
       const req = { params: { id: bookId }, body: updatedData };
       const res = getMockRes();
 
       await updateBook(req, res);
 
-      expect(db.execute).toHaveBeenCalledTimes(1);
+      expect(db.execute).toHaveBeenCalledTimes(2);
 
-      const [sql, params] = db.execute.mock.calls[0];
+      expect(db.execute.mock.calls[0]).toEqual([
+         "SELECT * FROM books WHERE id = ?",
+         [bookId],
+      ]);
 
+      const [sql, params] = db.execute.mock.calls[1];
       expect(sql).toEqual(expect.stringContaining("UPDATE books"));
       expect(params).toEqual([
          "Updated Title",
@@ -164,17 +178,17 @@ describe("updateBook", () => {
          "new-cover.jpg",
          bookId,
       ]);
+
       expect(res.json).toHaveBeenCalledWith({
          message: "Book updated successfully",
       });
    });
 
    it("Should return 404 if book to update is not found", async () => {
-
       const bookId = 1234;
       const updatedData = { title: "Won't work" };
 
-      db.execute.mockResolvedValue([{ affectedRows: 0 }]);
+      db.execute.mockResolvedValue([[]]);
 
       const req = { params: { id: bookId }, body: updatedData };
       const res = getMockRes();
@@ -183,6 +197,8 @@ describe("updateBook", () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ error: "Book not found" });
+
+      expect(db.execute).toHaveBeenCalledTimes(1);
    });
 });
 
