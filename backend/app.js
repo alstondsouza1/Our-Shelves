@@ -9,7 +9,6 @@ import morgan from 'morgan';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || 'localhost';
 
 // enabling CORS (so frontend can communicate with backend from different domain)
@@ -37,7 +36,5 @@ app.get('/db-test', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-app.listen(PORT, () => console.log(`Server running at http://${HOST}:${PORT}`));
 
 export default app;

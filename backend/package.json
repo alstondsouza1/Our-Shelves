@@ -24,10 +24,10 @@
   },
   "contributors": [],
   "scripts": {
-    "dev": "nodemon app.js",
-    "start": "node app.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:integration": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.js",
+    "test:integration": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.cjs",
     "test:watch": "npm run test -- --watch"
   },
   "dependencies": {
@@ -38,15 +38,11 @@
     "mysql2": "^3.15.1"
   },
   "devDependencies": {
+    "@testcontainers/mysql": "^11.8.1",
+    "cross-env": "^10.1.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.10",
-    "supertest": "^7.1.4"
-  },
-  "jest": {
-    "globalSetup": "./jest.setup.js#setup",
-    "globalTeardown": "./jest.setup.js#teardown",
-    "testMatch": [
-      "**/integration.test.js"
-    ]
+    "supertest": "^7.1.4",
+    "testcontainers": "^11.8.1"
   }
 }
