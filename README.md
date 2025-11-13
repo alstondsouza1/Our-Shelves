@@ -106,7 +106,7 @@ npm install
 
 ## Testing Strategy
 
-This project includes unit tests for both the frontend and backend, as well as end-to-end (E2E) tests.
+This project includes unit tests for both the frontend and backend, integration tests, as well as end-to-end (E2E) tests.
 
 ### Backend - Unit Tests (Jest)
 
