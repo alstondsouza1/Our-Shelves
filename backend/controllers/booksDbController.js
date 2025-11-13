@@ -93,19 +93,37 @@ export const createBook = async (req, res) => {
  * PUT /books/:id
  */
 export const updateBook = async (req, res) => {
-  const { id } = req.params;
-  const { title, author, genre, description, year, cover } = req.body;
-
   try {
-    const [result] = await db.execute(`
-      UPDATE books
-      SET title = ?, author = ?, genre = ?, description = ?, year = ?, cover = ?
-      WHERE id = ?
-    `, [title, author, genre, description, year, cover, id]);
+    const { id } = req.params;
+    const { title, author, genre, description, year, cover } = req.body;
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Book not found' });
+    const [existing] = await db.execute("SELECT * FROM books WHERE id = ?", [id]);
+    if (existing.length === 0) {
+      return res.status(404).json({ error: "Book not found" });
     }
+
+    const book = existing[0];
+
+    const sql = `
+      UPDATE books SET
+        title = ?,
+        author = ?,
+        genre = ?,
+        description = ?,
+        year = ?,
+        cover = ?
+      WHERE id = ?
+    `;
+
+    await db.execute(sql, [
+      title ?? book.title,
+      author ?? book.author,
+      genre ?? book.genre,
+      description ?? book.description,
+      year ?? book.year,
+      cover ?? book.cover,
+      id
+    ]);
 
     res.json({ message: 'Book updated successfully' });
   } catch (err) {
