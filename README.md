@@ -180,6 +180,30 @@ npx cypress open
 
 This will open the Cypress app. From there, you can choose a browser and run the app.cy.js test suite.
 
+### Generating Videos & Screenshots (Cypress Headless Mode)
+
+Purpose: Runs the tests in the terminal without opening a popup window. **This mode is required to generate video recordings and error screenshots**.
+
+How to Run:
+
+1. Ensure the frontend dev server is running (if not already):
+
+```bash
+cd frontend
+npm run dev
+```
+
+2. Open a new terminal:
+
+```bash
+cd frontend
+npx cypress run
+```
+Output:
+
+- Videos are saved to: frontend/cypress/videos
+- Screenshots (on failure) are saved to: frontend/cypress/screenshots
+
 ## Running the Application (Local)
 
 The backend, frontend, and MySQL server can all be built and ran with one command:
