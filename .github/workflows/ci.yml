@@ -64,7 +64,8 @@ jobs:
           timeout 60 bash -c 'until curl -f http://localhost:5173; do sleep 2; done'
 
       - name: Run E2E tests
-        run: docker compose run --rm -e CYPRESS_baseUrl=http://localhost:5173 frontend npx cypress run
+        run: docker compose exec -e CYPRESS_baseUrl=http://localhost:5173 frontend npx cypress run
+
 
       - name: Stop services
         if: always()
