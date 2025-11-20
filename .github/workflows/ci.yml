@@ -54,11 +54,18 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Wait for all services to be ready and built
+        run: docker compose up -d
+
+      - name: Wait for services to be ready
         run: |
-          echo "Starting all services..."
-          docker compose up -d
-          echo "Waiting for services to stabilize..."
-          sleep 10
+          echo "Waiting for backend to be ready..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000/; do sleep 2; done'
+          echo "Waiting for frontend to be ready..."
+          timeout 60 bash -c 'until curl -f http://localhost:5173; do sleep 2; done'
 
       - name: Run E2E tests
-        run: docker compose run --rm e2e sh -c "npm run test:e2e"
+        run: docker compose run --rm -e CYPRESS_baseUrl=http://localhost:5173 frontend npx cypress run
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
