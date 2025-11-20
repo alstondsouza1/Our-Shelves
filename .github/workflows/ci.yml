@@ -31,7 +31,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Run backend integration tests within docker container
-        run: docker compose run --rm api sh -c "npm run test:integration"
+      # mount the docker socket to allow the test container to interact with the host docker daemon
+      # alternative is to add volume mount to docker-compose.yml
+        run: docker compose run --rm -v /var/run/docker.sock:/var/run/docker.sock api sh -c "npm run test:integration"
 
 
   frontend-tests:
