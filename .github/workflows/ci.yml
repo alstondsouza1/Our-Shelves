@@ -64,7 +64,7 @@ jobs:
           timeout 60 bash -c 'until curl -f http://localhost:5173; do sleep 2; done'
 
       - name: Install Cypress dependencies
-        run: docker compose exec frontend sh -c "apt-get install -y libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth xvfb"
+        run: docker compose exec frontend sh -c "sudo apt install -y libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth xvfb"
 
       - name: Run E2E tests
         run: docker compose exec -e CYPRESS_baseUrl=http://localhost:5173 frontend sh -c "xvfb-run -a npx cypress run"
