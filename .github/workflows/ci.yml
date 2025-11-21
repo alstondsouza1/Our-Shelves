@@ -1,75 +1,97 @@
-name: CI/CD Pipeline for OurShelves
+name: CI/CD Pipeline - OurShelves
 
 on: 
   push:
-    branches: [ feat/ci-cd ]
+    branches: [ "main", "dev", "feat/ci-cd" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main", "dev" ]
 
 jobs:
   backend-tests:
+    name: Backend Unit Tests
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Start the DB
-        run: docker compose up -d db
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-      - name: Wait for database to be setup
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Run backend unit tests
+        working-directory: backend
+        run: npm test
+
+  backend-integration:
+    name: Backend Integration Tests
+    runs-on: ubuntu-latest
+    needs: backend-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm install
+
+      - name: Allow Testcontainers access to Docker
+        run: sudo chmod 666 /var/run/docker.sock
+
+      - name: Run integration tests (Testcontainers)
+        working-directory: backend
+        env:
+          TEST_DB_HOST: localhost
+          TEST_DB_PORT: 3306
+          TEST_DB_USER: root
+          TEST_DB_PASSWORD: root
+          TEST_DB_NAME: testdb
         run: |
-          echo "Waiting for MySQL to be ready..."
-          timeout 60 bash -c 'until docker compose exec -T db mysqladmin ping -h localhost -pRootpassword --silent; do sleep 2; done'
-
-      - name: Run backend unit tests within docker container
-        run: docker compose run --rm api sh -c "npm test"
-
-  backend-integration-tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Run backend integration tests within docker container
-      # mount the docker socket to allow the test container to interact with the host docker daemon
-      # alternative is to add volume mount to docker-compose.yml
-        run: docker compose run --rm -v /var/run/docker.sock:/var/run/docker.sock api sh -c "npm run test:integration"
-
+          docker info
+          npm run test:integration
 
   frontend-tests:
+    name: Frontend Unit Tests
     runs-on: ubuntu-latest
+    needs: backend-integration
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Run frontend tests within container
-        run: docker compose run --rm frontend sh -c "npm run test"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm test -- --run
 
   e2e-tests:
+    name: Cypress End-to-End Tests
     runs-on: ubuntu-latest
-    needs: [backend-tests, backend-integration-tests, frontend-tests]
+    needs: frontend-tests
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Wait for all services to be ready and built
-        run: docker compose up -d
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-      - name: Wait for services to be ready
-        run: |
-          echo "Waiting for backend to be ready..."
-          timeout 60 bash -c 'until curl -f http://localhost:3000/; do sleep 2; done'
-          echo "Waiting for frontend to be ready..."
-          timeout 60 bash -c 'until curl -f http://localhost:5173; do sleep 2; done'
-
-      - name: Install Cypress dependencies
-        run: docker compose exec frontend sh -c "apt update && apt install -y libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth xvfb"
-
-      - name: Run E2E tests
-        run: docker compose exec -e CYPRESS_baseUrl=http://localhost:5173 frontend sh -c "npx cypress run"
-
-
-      - name: Stop services
-        if: always()
-        run: docker compose down
+      - name: Start backend + frontend via docker compose
+        run: do
