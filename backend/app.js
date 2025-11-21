@@ -12,7 +12,8 @@ const HOST = process.env.HOST || 'localhost';
 
 app.use(cors({
     origin: [
-      `http://${HOST}:5173`
+      "http://143.198.63.60:5173",
+      "http://localhost:5173"
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
