@@ -8,6 +8,14 @@ const Library = () => {
 
     const [books, setBooks] = useState([]);
 
+    {Array.isArray(books) && books.length > 0 ? (
+      books.map(book => (
+        <BookCard key={book.id} book={book} />
+      ))
+    ) : (
+      <p>No books found.</p>
+    )}
+      
     // Function to fetch all books from the backend API
     const getBooks = async () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/books`);
