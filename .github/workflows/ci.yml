@@ -88,10 +88,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+      - name: Install Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose
 
       - name: Start backend + frontend via docker compose
-        run: do
+        run: |
+          docker compose up -d
+
+      - name: Wait for backend
+        run: npx wait-on http://localhost:3000
+
+      - name: Wait for frontend
+        run: npx wait-on http://localhost:5173
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: frontend
+          browser: chrome
+          wait-on: "http://localhost:5173"
