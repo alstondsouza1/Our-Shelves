@@ -1,0 +1,46 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - deploy   # only deploy when pushing to this branch
+
+jobs:
+  deploy:
+    name: Deploy app to VM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd ~/Our-Shelves
+
+            echo "Pulling latest code from deploy branch..."
+            git fetch origin
+            git checkout deploy
+            git pull origin deploy
+
+            echo "Stopping old containers..."
+            docker compose down
+
+            echo "Rebuilding images..."
+            docker compose build --no-cache
+
+            echo "Starting containers..."
+            docker compose up -d
+
+            echo "Current containers:"
+            docker ps
+
+            echo "Checking frontend health..."
+            curl -f http://localhost:5173 || (echo "Health check failed" && exit 1)
+
+            echo "Deployment finished successfully!"
