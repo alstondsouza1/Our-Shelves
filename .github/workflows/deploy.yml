@@ -1,46 +1,47 @@
-name: Deploy to VM
+name: Deploy app to VM
 
 on:
   push:
     branches:
-      - deploy   # only deploy when pushing to this branch
+      - deploy 
 
 jobs:
   deploy:
-    name: Deploy app to VM
+    name: Deploy via SSH
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via SSH
+      - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/Our-Shelves
+            echo "=== Switching to project directory ==="
+            cd ~/Our-Shelves || exit 1
 
-            echo "Pulling latest code from deploy branch..."
+            echo "=== Pulling latest code ==="
             git fetch origin
-            git checkout deploy
-            git pull origin deploy
+            git checkout main
+            git pull origin main
 
-            echo "Stopping old containers..."
-            docker compose down
+            echo "=== Stopping containers ==="
+            docker compose down || true
 
-            echo "Rebuilding images..."
+            echo "=== Rebuilding images ==="
             docker compose build --no-cache
 
-            echo "Starting containers..."
+            echo "=== Starting containers ==="
             docker compose up -d
 
-            echo "Current containers:"
+            echo "=== Checking containers ==="
             docker ps
 
-            echo "Checking frontend health..."
-            curl -f http://localhost:5173 || (echo "Health check failed" && exit 1)
+            echo "=== Checking frontend health ==="
+            curl -f http://localhost:5173 || (echo "Frontend health check failed" && exit 1)
 
-            echo "Deployment finished successfully!"
+            echo "=== Deployment successful! ==="
