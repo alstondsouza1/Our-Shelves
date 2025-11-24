@@ -29,7 +29,15 @@ jobs:
             docker compose down
             docker compose up -d --build
 
-            echo "Checking health..."
-            curl -f http://localhost:5173 || exit 1
+            echo "Waiting for frontend..."
+            for i in {1..10}; do
+              if curl -s http://localhost:5173 > /dev/null; then
+                echo "Frontend is up!"
+                exit 0
+              fi
+              echo "Retry $i: frontend not ready, waiting 3s..."
+              sleep 3
+            done
 
-            echo "Deployment successful!"
+            echo "Frontend failed to respond."
+            exit 1
