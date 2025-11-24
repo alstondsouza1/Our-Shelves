@@ -2,46 +2,34 @@ name: Deploy app to VM
 
 on:
   push:
-    branches:
-      - main 
+    branches: ["main"]
 
 jobs:
   deploy:
-    name: Deploy via SSH
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Deploy over SSH
+      - name: Deploy to VM
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "=== Switching to project directory ==="
-            cd ~/Our-Shelves || exit 1
+            cd ~/Our-Shelves
 
-            echo "=== Pulling latest code ==="
+            echo "Pulling latest code..."
             git fetch origin
-            git checkout main
-            git pull origin main
+            git reset --hard origin/main
 
-            echo "=== Stopping containers ==="
-            docker compose down || true
+            echo "Restarting containers..."
+            docker compose down
+            docker compose up -d --build
 
-            echo "=== Rebuilding images ==="
-            docker compose build --no-cache
+            echo "Checking health..."
+            curl -f http://localhost:5173 || exit 1
 
-            echo "=== Starting containers ==="
-            docker compose up -d
-
-            echo "=== Checking containers ==="
-            docker ps
-
-            echo "=== Checking frontend health ==="
-            curl -f http://localhost:5173 || (echo "Frontend health check failed" && exit 1)
-
-            echo "=== Deployment successful! ==="
+            echo "Deployment successful!"

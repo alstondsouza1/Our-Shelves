@@ -82,8 +82,17 @@ jobs:
 
   e2e-tests:
     name: Cypress End-to-End Tests
-    runs-on: ubuntu-latest
     needs: frontend-tests
+    runs-on: ubuntu-latest
+
+    env:
+      MYSQL_USER: ciuser
+      MYSQL_PASSWORD: cipass
+      MYSQL_DATABASE: ourshelves_ci
+      DB_PORT: 3306
+      PORT: 3000
+      HOST: 0.0.0.0
+      VITE_API_URL: http://localhost:3000
 
     steps:
       - uses: actions/checkout@v4
@@ -92,8 +101,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y docker-compose
 
       - name: Start backend + frontend via docker compose
-        run: |
-          docker compose up -d
+        run: docker compose up -d --build
 
       - name: Wait for backend
         run: npx wait-on http://localhost:3000

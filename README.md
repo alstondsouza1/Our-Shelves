@@ -338,5 +338,63 @@ docker compose down
 
 ---
 
+# CI/CD (Sprint 5)
+
+## Continuous Integration (CI)
+
+We use GitHub Actions to automatically test the entire application on every push and pull request to `main` and `dev`.
+
+Workflow: `.github/workflows/test.yml`
+
+The pipeline includes:
+
+### 1. Backend Unit Tests
+- Runs Jest tests for controllers and logic
+- Database functions and network calls are mocked
+
+### 2. Backend Integration Tests (Testcontainers)
+- Uses Jest + Testcontainers to run a real MySQL container
+- Verifies route handlers and SQL queries with actual DB behavior
+
+### 3. Frontend Unit Tests
+- Uses Vitest + React Testing Library
+- Tests component rendering, interaction, and state
+
+### 4. Cypress End-to-End Tests
+- Docker Compose starts backend + frontend inside CI
+- Cypress simulates a full real user workflow
+- Tests:
+  - Searching for a book
+  - Adding a book
+  - Viewing saved books
+  - Deleting a book
+
+If any test fails, the workflow blocks merging.
+
+---
+
+## Continuous Deployment (CD)
+
+Workflow: `.github/workflows/deploy.yml`
+
+Deployment is triggered automatically on every push to the `main` branch.
+
+Steps performed:
+
+1. SSH into the VM using stored GitHub secrets  
+2. Pull the latest code  
+3. Stop existing containers  
+4. Rebuild and restart using `docker compose up -d --build`  
+5. Run a health check on the frontend  
+6. Deployment succeeds only if the frontend responds correctly
+
+This CI/CD setup ensures:
+
+- No broken code reaches production  
+- Deployment happens automatically  
+- The server always runs the latest stable version of the app  
+
+---
+
 ## License
 This project is for educational use as part of a student project at Green River College.
