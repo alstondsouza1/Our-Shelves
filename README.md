@@ -1,3 +1,4 @@
+
 # Our Shelves
 
 A reading tracker web application that allows users to search for books using the **Open Library API**, save them to their personal digital shelf, and manage their book collection.
@@ -15,386 +16,216 @@ A reading tracker web application that allows users to search for books using th
 **Sprint 4:**
 - Tav
 - Tia
+
+**Sprint 5:**
+- Alston
+- Danny
+
 ---
 
 ## Project Description
 
 **Our Shelves** lets users:
-- Search for books by title using the [Open Library API](https://openlibrary.org/developers/api).
-- Add books to their personal shelf stored in a **MySQL** database.
+- Search for books by title using the Open Library API.
+- Add books to their personal shelf stored in a MySQL database.
 - View their saved books.
 - Delete books from their library.
-- Interact with a **React frontend** and **Express backend**, connected via REST API.
-
-### Future Feature Goals
-- Add personal notes to books.
-- Track bookmarks / reading progress.
-- Organize books into multiple shelves.
-- Share shelves and notes with friends.
-- Support light/dark theme customization.
+- Use a React frontend + Express backend via REST API.
 
 ---
 
 ## Tech Stack
 
-| Layer             | Technology                     |
-|--------------------|-----------------------------|
-| Frontend           | React (Vite), React Router   |
-| Backend            | Node.js, Express.js          |
-| Database           | MySQL (`mysql2/promise`)     |
-| External API       | Open Library API            |
-| Packaging     | Docker            |
-| Deployment         | Ubuntu Server         |
+| Layer | Technology |
+|-------|------------|
+| Frontend | React (Vite), React Router |
+| Backend | Node.js, Express |
+| Database | MySQL |
+| External API | Open Library API |
+| Packaging | Docker |
+| Deployment | Ubuntu Server + Docker Compose |
 
 ---
 
-## Prerequisites
+## Project Structure
 
-Make sure the following are installed:
-
-- [Node.js v18+](https://nodejs.org/en/)
-- [npm](https://www.npmjs.com/)
-- [MySQL](https://dev.mysql.com/downloads/mysql/)
-- [Docker](https://www.docker.com/get-started/)
+```
+Our-Shelves/
+│
+├── backend/
+│   ├── controllers/
+│   ├── routes/
+│   ├── db.js
+│   ├── init/sql/
+│   └── __tests__/
+│
+├── frontend/
+│   ├── src/components/
+│   ├── src/pages/
+│   ├── src/hooks/
+│   ├── cypress/
+│   └── src/setupTests.js
+│
+├── docker-compose.yml
+├── .github/workflows/
+└── README.md
+```
 
 ---
 
 ## Environment Variables
 
-### Inside project root `env`
-```env
-# db & api
+```
 MYSQL_USER=username
 MYSQL_PASSWORD=superSecurePassword
 MYSQL_DATABASE=my_favorite_db
-
-# api
 DB_PORT=3306
 PORT=3000
 HOST=localhost
-
-# frontend
 VITE_API_URL=http://${HOST}:${PORT}
 ```
-
-> For production, replace `localhost` with your server IP or domain name.
 
 ---
 
 ## Local Development Setup
 
-### 1. Clone the Repository
-```bash
+```
 git clone https://github.com/your-username/our-shelves.git
 cd our-shelves
 ```
 
-### 2. Install Dependencies
-```bash
-cd backend
-npm install
+Install dependencies:
 
-cd ../frontend
-npm install
+```
+cd backend && npm install
+cd ../frontend && npm install
 ```
 
-### 3. Set Up `.env` File
-- Create `.env` inside root directory.
-- Copy and paste the environment variable structure shown above.
+---
+
+## Running the Application
+
+```
+docker compose up -d
+```
+
+Frontend: http://localhost:5173  
+Backend: http://localhost:3000
 
 ---
 
 ## Testing Strategy
 
-This project includes unit tests for both the frontend and backend, integration tests, as well as end-to-end (E2E) tests.
-
-### Backend - Unit Tests (Jest)
-
-Purpose: Tests individual backend controllers in isolation. All database calls (db.js) and fetch requests are mocked, so no database or network connection is required.
-
-How to Run:
-
-```bash
+### Backend Unit Tests
+```
 cd backend
 npm test
 ```
 
-
-This command runs all files ending in .test.js found in the backend/__tests__ folder.
-
-### Frontend - Unit Tests (Vitest & React Testing Library)
-
-Purpose: Tests individual React components in a simulated browser environment. All fetch API calls are mocked in the setup file (frontend/src/setupTests.js).
-
-How to Run:
-
-```bash
-cd frontend
-npm test
+### Backend Integration Tests
 ```
-
-This command will start Vitest in "watch mode," automatically re-running tests as you save changes.
-
-### Coverage Reports
-
-To generate a coverage report, cd into the respective directory (backend/frontend) and run the following command
-
-```bash
-npm test -- --coverage
-```
-
-## Backend - Integration Tests (Jest & Testcontainers)
-
-Purpose: Tests the live application routes and controllers against a real, temporary database. This ensures all database queries, joins, and logic work as expected.
-
-### Requirements: Docker must be installed and running on your system
-
-How to Run:
-
-```bash
 cd backend
 npm run test:integration
 ```
 
-## End-to-End (E2E) Tests (Cypress)
-
-Purpose: Simulates a real user journey in a real browser. It tests the complete application flow, from searching for a book to adding it to the library and deleting it.
-
-How to Run (2 Steps):
-
-1. Start the frontend dev server:
-
-```bash
+### Frontend Unit Tests
+```
 cd frontend
-npm run dev
+npm test
 ```
 
-2. Open the Cypress runner:
-
-### Important - Make sure to do this in a new terminal window
-
-```bash
+### Cypress E2E Tests
+```
 cd frontend
+npm run dev
 npx cypress open
 ```
 
-This will open the Cypress app. From there, you can choose a browser and run the app.cy.js test suite.
+---
 
-### Generating Videos & Screenshots (Cypress Headless Mode)
+## Running Tests Locally
 
-Purpose: Runs the tests in the terminal without opening a popup window. **This mode is required to generate video recordings and error screenshots**.
-
-How to Run:
-
-1. Ensure the frontend dev server is running (if not already):
-
-```bash
-cd frontend
-npm run dev
+```
+cd backend && npm test
+cd backend && npm run test:integration
+cd frontend && npm test
 ```
 
-2. Open a new terminal:
+---
 
-```bash
-cd frontend
-npx cypress run
+## CI/CD (Sprint 5)
+
+### Continuous Integration  
+Workflow: `.github/workflows/ci.yml`
+
+Runs automatically on every push or pull request. Includes:
+
+1. Backend unit tests  
+2. Backend integration tests (Testcontainers)  
+3. Frontend unit tests  
+4. Full Cypress E2E tests using Docker Compose  
+
+### Continuous Deployment  
+Workflow: `.github/workflows/deploy.yml`
+
+Triggered on push to `main`. Steps:
+
+1. SSH into VM  
+2. Pull latest code  
+3. Rebuild containers  
+4. Restart services  
+5. Health-check frontend  
+6. Mark deployment successful  
+
+---
+
+## Deployment Instructions (Ubuntu VM)
+
+Install Git, Docker, and Docker Compose. Then:
+
 ```
-Output:
-
-- Videos are saved to: frontend/cypress/videos
-- Screenshots (on failure) are saved to: frontend/cypress/screenshots
-
-## Running the Application (Local)
-
-The backend, frontend, and MySQL server can all be built and ran with one command:
-```bash
+git clone https://github.com/your-username/our-shelves.git
+cd our-shelves
+nano .env
 docker compose up -d
 ```
 
 ---
 
-## Deployment Instructions (Ubuntu + Docker)
+## System Architecture
 
-### 1. Update VM and Install Dependencies
-**Updating:**
-```bash
-apt update
-yes | sudo DEBIAN_FRONTEND=noninteractive apt-get -yqq upgrade
 ```
-
-**Install Git**
-```bash
-apt install git
+Frontend (React, port 5173)
+        │
+        ▼
+Backend (Express API, port 3000)
+        │
+        ▼
+MySQL Database (3306)
 ```
-
-**Install Docker Engine With apt Repository**
-Setup apt repo:
-```bash
-# Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# Add the repository to Apt sources:
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-```
-Install docker package:
-```bash
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
-
-Confirm docker is installed and running:
-```bash
-sudo systemctl status docker
-```
-
-**Install docker compose**
-```bash
-sudo apt-get update
-sudo apt-get install docker-compose-plugin
-```
-
-### 2. Clone Repository
-```bash
-git clone https://github.com/your-username/our-shelves.git
-cd our-shelves
-```
-
-### 3. Add .env to repository
-```bash
-nano .env
-```
-Inside nano text editor:
-
-```env
-# db & api
-MYSQL_USER=username
-MYSQL_PASSWORD=superSecurePassword
-MYSQL_DATABASE=my_favorite_db
-
-# api
-DB_PORT=3306
-PORT=3000
-HOST=<VM IP>
-
-# frontend
-VITE_API_URL=http://${HOST}:${PORT}
-```
-Ctrl + o to save
-Ctrl + x to exit
-
-Check if .env exists:
-```bash
-ls -a
-```
-### 4. Build and Deploy Docker Images
-The application can be built and deployed with one command now:
-```bash
-docker compose up -d
-```
-
-The frontend will be running on the VMs IP address defined in the env, on PORT 5173.
-ex: http://0.0.0.0:5173  (replace 0.0.0.0 with VM IP)
-
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint                        | Description                         |
-|--------|-----------------------------------|-------------------------------------|
-| GET    | `/books`                          | Fetch all saved books              |
-| POST   | `/books`                          | Add a new book                     |
-| DELETE | `/books/:id`                      | Delete a book by ID                |
-| GET    | `/books/search/:bookName`         | Search books via Open Library API  |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /books | Fetch all saved books |
+| POST | /books | Add a new book |
+| DELETE | /books/:id | Delete a book |
+| GET | /books/search/:bookName | Search via Open Library API |
 
 ---
 
 ## Useful Commands
 
-**Updating Deployed App:**
-```bash
-git pull
-docker compose up -build
 ```
-
-**Stopping:**
-```bash
+docker compose up --build
 docker compose down
+git pull
 ```
 
 ---
 
-## Troubleshooting Tips
-- Ensure `.env` files are correctly configured
-- Confirm no leading spaces in env variables
-- Check firewall settings if deploying to a remote server (allow ports 3000 and 5173).
-
----
-
-# CI/CD (Sprint 5)
-
-## Continuous Integration (CI)
-
-We use GitHub Actions to automatically test the entire application on every push and pull request to `main` and `dev`.
-
-Workflow: `.github/workflows/test.yml`
-
-The pipeline includes:
-
-### 1. Backend Unit Tests
-- Runs Jest tests for controllers and logic
-- Database functions and network calls are mocked
-
-### 2. Backend Integration Tests (Testcontainers)
-- Uses Jest + Testcontainers to run a real MySQL container
-- Verifies route handlers and SQL queries with actual DB behavior
-
-### 3. Frontend Unit Tests
-- Uses Vitest + React Testing Library
-- Tests component rendering, interaction, and state
-
-### 4. Cypress End-to-End Tests
-- Docker Compose starts backend + frontend inside CI
-- Cypress simulates a full real user workflow
-- Tests:
-  - Searching for a book
-  - Adding a book
-  - Viewing saved books
-  - Deleting a book
-
-If any test fails, the workflow blocks merging.
-
----
-
-## Continuous Deployment (CD)
-
-Workflow: `.github/workflows/deploy.yml`
-
-Deployment is triggered automatically on every push to the `main` branch.
-
-Steps performed:
-
-1. SSH into the VM using stored GitHub secrets  
-2. Pull the latest code  
-3. Stop existing containers  
-4. Rebuild and restart using `docker compose up -d --build`  
-5. Run a health check on the frontend  
-6. Deployment succeeds only if the frontend responds correctly
-
-This CI/CD setup ensures:
-
-- No broken code reaches production  
-- Deployment happens automatically  
-- The server always runs the latest stable version of the app  
-
----
-
-## License
+## License  
 This project is for educational use as part of a student project at Green River College.
